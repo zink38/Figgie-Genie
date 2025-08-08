@@ -11,8 +11,7 @@ def validate_input(args):
         tuple: A tuple containing a boolean (True for valid, False for invalid)
                and a message string.
     """
-    # Check if the correct number of arguments is provided.
-    # We expect 5 arguments: the script name, color, and four integers.
+    # We expect a color and four integers, so a total of 5 arguments.
     if len(args) != 5:
         return False, "Error: Incorrect number of arguments. Expected: <color> <int1> <int2> <int3> <int4>"
 
@@ -44,26 +43,34 @@ def validate_input(args):
 
 def main():
     """
-    Main function to run the Figgie CLI tool.
+    Main function to run the interactive Figgie CLI tool.
     """
-    # Get command-line arguments, excluding the script name.
-    input_args = sys.argv[1:]
-    
-    # Perform validation on the provided input.
-    is_valid, message = validate_input(input_args)
-    
-    # Print the result of the validation.
-    if is_valid:
-        print(message)
-        print(f"Color: {input_args[0]}, Numbers: {input_args[1:]}")
-        # Here you can continue with the next steps of your program.
-        # For example, you would start the card counting logic.
-    else:
-        print(message)
-        print("Usage: python figgie_cli.py <color> <num1> <num2> <num3> <num4>")
-        print("Example: python figgie_cli.py R 5 5 0 0")
+    print("Welcome to the Figgie Card Counter!")
+    print("Enter your initial cards (e.g., R 5 5 0 0) or type 'exit' to quit.")
+
+    while True:
+        user_input = input("> ").strip()
+
+        if user_input.lower() == 'exit':
+            print("Exiting the program. Goodbye!")
+            break
+        
+        # Split the input string into a list of arguments.
+        input_args = user_input.split()
+        
+        # Perform validation on the provided input.
+        is_valid, message = validate_input(input_args)
+        
+        # Print the result of the validation.
+        if is_valid:
+            print(message)
+            print(f"Color: {input_args[0]}, Numbers: {input_args[1:]}")
+            # You would place the card counting logic here.
+        else:
+            print(message)
 
 
 if __name__ == "__main__":
     main()
 
+R

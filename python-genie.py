@@ -1,16 +1,40 @@
 import sys
 
 def validate_input(args):
-    """
-    Validates the initial Figgie input, which sets up the game.
-    
-    Args:
-        args (list): A list of command-line arguments.
 
-    Returns:
-        tuple: A tuple containing a boolean (True for valid, False for invalid)
-               and a message string.
-    """
+    if len(args) < 4:
+        return False, "Error: Need at least 4 players"
+    
+    if len(args) > 5:
+        return False, "Error: Too many players"
+
+
+    color = args[0].upper() # Cast the color input to upper case here
+    nums = args[1:]
+
+    # Validate the color input.
+    if color not in valid_colors:
+        return False, f"Error: Invalid color '{color}'. Color must be one of {valid_colors}"
+
+    # Validate the four integer inputs.
+    try:
+        nums = [int(num) for num in nums]
+    except ValueError:
+        return False, "Error: All four numbers must be integers."
+    
+    # Check if each number is within the valid range [0, 10].
+    for num in nums:
+        if not (0 <= num <= 10):
+            return False, "Error: All numbers must be between 0 and 10 (inclusive)."
+
+    # Check if the sum of the numbers is exactly 10.
+    if sum(nums) != 10:
+        return False, f"Error: The sum of the numbers must be exactly 10. Current sum is {sum(nums)}."
+
+    return True, "Input successfully validated."
+
+def validate_input(args, valid_colors):
+
     # We expect a color and four integers, so a total of 5 arguments.
     if len(args) != 5:
         return False, "Error: Incorrect number of arguments. Expected: <color> <int1> <int2> <int3> <int4>"
@@ -19,7 +43,6 @@ def validate_input(args):
     nums = args[1:]
 
     # Validate the color input.
-    valid_colors = ['R', 'G', 'B', 'Y']
     if color not in valid_colors:
         return False, f"Error: Invalid color '{color}'. Color must be one of {valid_colors}"
 
@@ -41,7 +64,7 @@ def validate_input(args):
     return True, "Input successfully validated."
 
 
-def validate_card_input(args):
+def validate_card_input(args, valid_colors):
     """
     Validates the card input during the game.
     
@@ -52,18 +75,17 @@ def validate_card_input(args):
         tuple: A tuple containing a boolean (True for valid, False for invalid)
                and a message string.
     """
-    valid_colors = ['R', 'G', 'B', 'Y']
     valid_suits = ['S', 'C', 'D', 'H']
 
     # Input can be 'color suit color' (3 arguments) or 'color suit' (2 arguments).
     if len(args) == 3:
         color1 = args[0].upper() # Cast color to uppercase
-        suit = args[1]
+        suit = args[1].upper() # Cast suit to upper
         color2 = args[2].upper() # Cast color to uppercase
         
         # Check if colors are valid
         if color1 not in valid_colors or color2 not in valid_colors:
-            return False, "Error: Invalid color(s). Colors must be R, G, B, or Y."
+            return False, f'Error: Invalid color(s). Colors must be {valid_colors}'
         # Check if the suit is valid
         if suit not in valid_suits:
             return False, "Error: Invalid suit. Suit must be S, C, D, or H."
@@ -93,7 +115,7 @@ def main():
     # This loop handles the entire application lifecycle, allowing for new games.
     while True:
         # Prompt for initial game setup.
-        print("\nEnter your initial cards (e.g., R 5 5 0 0) or type 'exit' to quit.")
+        print("\nEnter at least 4 player colors (R G B Y E) or type 'exit' to quit.")
         user_input = input("> ").strip()
         
         if user_input.lower() == 'exit':
@@ -104,6 +126,20 @@ def main():
         
         # Validate the initial input.
         is_valid, message = validate_input(input_args)
+        valid_colors = input_args
+        
+        # Prompt for initial game setup.
+        print("\nEnter your initial cards (e.g., R 5 5 0 0) or type 'exit' to quit.")
+        user_input = input("> ").strip()
+        
+        if user_input.lower() == 'exit':
+            print("Exiting the program. Goodbye!")
+            break
+        
+        input_args = user_input.split()
+        
+        # Validate the initial input.
+        is_valid, message = validate_input(input_args, valid_colors)
         
         if is_valid:
             print(message)
@@ -127,7 +163,7 @@ def main():
                 
                 card_args = card_input.split()
                 
-                is_valid_card, card_message = validate_card_input(card_args)
+                is_valid_card, card_message = validate_card_input(card_args, valid_colors)
                 
                 if is_valid_card:
                     print(f"Card input received: {card_input}")

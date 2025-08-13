@@ -15,7 +15,7 @@ def validate_input(args):
     if len(args) != 5:
         return False, "Error: Incorrect number of arguments. Expected: <color> <int1> <int2> <int3> <int4>"
 
-    color = args[0]
+    color = args[0].upper() # Cast the color input to upper case here
     nums = args[1:]
 
     # Validate the color input.
@@ -57,7 +57,10 @@ def validate_card_input(args):
 
     # Input can be 'color suit color' (3 arguments) or 'color suit' (2 arguments).
     if len(args) == 3:
-        color1, suit, color2 = args
+        color1 = args[0].upper() # Cast color to uppercase
+        suit = args[1]
+        color2 = args[2].upper() # Cast color to uppercase
+        
         # Check if colors are valid
         if color1 not in valid_colors or color2 not in valid_colors:
             return False, "Error: Invalid color(s). Colors must be R, G, B, or Y."
@@ -70,7 +73,9 @@ def validate_card_input(args):
         return True, "Valid 'color suit color' input."
 
     elif len(args) == 2:
-        color, suit = args
+        color = args[0].upper() # Cast color to uppercase
+        suit = args[1]
+        
         # Check if color and suit are valid
         if color not in valid_colors or suit not in valid_suits:
             return False, "Error: Invalid color or suit. Color must be R, G, B, or Y, and Suit must be S, C, D, or H."
@@ -103,7 +108,7 @@ def main():
         if is_valid:
             print(message)
             # You would store the initial counts here.
-            initial_color = input_args[0]
+            initial_color = input_args[0].upper() # Store the uppercase version
             initial_counts = [int(num) for num in input_args[1:]]
             print(f"Game started with Color: {initial_color}, Initial Counts: {initial_counts}")
             

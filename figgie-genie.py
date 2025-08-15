@@ -1,37 +1,31 @@
 import sys
 
-def validate_input(args):
-
+def validate_player_input(args):
+    valid_colors = {'R', 'B', 'G', 'Y', 'E'}
+    
     if len(args) < 4:
-        return False, "Error: Need at least 4 players"
+        return False, "Error: Need at least 4 players", valid_colors
     
     if len(args) > 5:
-        return False, "Error: Too many players"
-
-
-    color = args[0].upper() # Cast the color input to upper case here
-    nums = args[1:]
+        return False, "Error: Too many players", valid_colors
 
     # Validate the color input.
-    if color not in valid_colors:
-        return False, f"Error: Invalid color '{color}'. Color must be one of {valid_colors}"
 
-    # Validate the four integer inputs.
     try:
-        nums = [int(num) for num in nums]
+        colors = [color.upper() for color in args]
     except ValueError:
-        return False, "Error: All four numbers must be integers."
+        return False, "Error: must be letters consisting of R B G Y E", valid_colors
+
+    if len(colors) != len(set(colors)):
+        return False, "Error: The list contains duplicates", valid_colors
+
     
-    # Check if each number is within the valid range [0, 10].
-    for num in nums:
-        if not (0 <= num <= 10):
-            return False, "Error: All numbers must be between 0 and 10 (inclusive)."
+    for color in colors:  
+        if color not in valid_colors:
+            return False, f"Error: The list contains an invalid character: '{color}'. Allowed characters are {valid_colors}.", valid_colors
 
-    # Check if the sum of the numbers is exactly 10.
-    if sum(nums) != 10:
-        return False, f"Error: The sum of the numbers must be exactly 10. Current sum is {sum(nums)}."
-
-    return True, "Input successfully validated."
+    valid_colors = colors
+    return True, "Input successfully validated.", valid_colors 
 
 def validate_input(args, valid_colors):
 
@@ -52,14 +46,9 @@ def validate_input(args, valid_colors):
     except ValueError:
         return False, "Error: All four numbers must be integers."
     
-    # Check if each number is within the valid range [0, 10].
-    for num in nums:
-        if not (0 <= num <= 10):
-            return False, "Error: All numbers must be between 0 and 10 (inclusive)."
-
     # Check if the sum of the numbers is exactly 10.
-    if sum(nums) != 10:
-        return False, f"Error: The sum of the numbers must be exactly 10. Current sum is {sum(nums)}."
+    if sum(nums) != 40/len(valid_colors):
+        return False, f"Error: The sum of the numbers must be exactly {40/len(valid_colors)}. Current sum is {sum(nums)}."
 
     return True, "Input successfully validated."
 
@@ -77,34 +66,33 @@ def validate_card_input(args, valid_colors):
     """
     valid_suits = ['S', 'C', 'D', 'H']
 
+    color = args[0].upper() # Cast color to uppercase
+    suit = args[1].upper() # Cast suit to upper
     # Input can be 'color suit color' (3 arguments) or 'color suit' (2 arguments).
     if len(args) == 3:
-        color1 = args[0].upper() # Cast color to uppercase
-        suit = args[1].upper() # Cast suit to upper
+
         color2 = args[2].upper() # Cast color to uppercase
         
         # Check if colors are valid
-        if color1 not in valid_colors or color2 not in valid_colors:
+        if color not in valid_colors or color2 not in valid_colors:
             return False, f'Error: Invalid color(s). Colors must be {valid_colors}'
         # Check if the suit is valid
         if suit not in valid_suits:
             return False, "Error: Invalid suit. Suit must be S, C, D, or H."
         # The two colors cannot be the same
-        if color1 == color2:
+        if color == color2:
             return False, "Error: The two colors cannot be the same."
         return True, "Valid 'color suit color' input."
 
     elif len(args) == 2:
-        color = args[0].upper() # Cast color to uppercase
-        suit = args[1]
         
         # Check if color and suit are valid
         if color not in valid_colors or suit not in valid_suits:
-            return False, "Error: Invalid color or suit. Color must be R, G, B, or Y, and Suit must be S, C, D, or H."
+            return False, f'Error: Invalid color or suit. Color must be {valid_colors}, and Suit must be S, C, D, or H.'
         return True, "Valid 'color suit' input."
 
     else:
-        return False, "Error: Invalid input format. Expected 'color suit color' or 'color suit'."
+        return False, "Error: Invalid input total arguments."
 
 def main():
     """
@@ -125,54 +113,57 @@ def main():
         input_args = user_input.split()
         
         # Validate the initial input.
-        is_valid, message = validate_input(input_args)
-        valid_colors = input_args
-        
-        # Prompt for initial game setup.
-        print("\nEnter your initial cards (e.g., R 5 5 0 0) or type 'exit' to quit.")
-        user_input = input("> ").strip()
-        
-        if user_input.lower() == 'exit':
-            print("Exiting the program. Goodbye!")
-            break
-        
-        input_args = user_input.split()
-        
-        # Validate the initial input.
-        is_valid, message = validate_input(input_args, valid_colors)
+        is_valid, player_message, valid_colors = validate_player_input(input_args)
         
         if is_valid:
-            print(message)
-            # You would store the initial counts here.
-            initial_color = input_args[0].upper() # Store the uppercase version
-            initial_counts = [int(num) for num in input_args[1:]]
-            print(f"Game started with Color: {initial_color}, Initial Counts: {initial_counts}")
-            
-            # This inner loop handles the ongoing game.
             while True:
-                print("\nEnter played cards (e.g., R S Y or Y H), 'new' to start over, or 'exit' to quit.")
-                card_input = input("Card Played > ").strip()
+                # Prompt for initial game setup.
+                print("\nEnter your initial cards (e.g., R 5 5 0 0) or type 'exit' to quit.")
+                user_input = input("> ").strip()
                 
-                if card_input.lower() == 'new':
-                    # Break the inner loop to start a new game.
+                if user_input.lower() == 'exit':
+                    print("Exiting the program. Goodbye!")
                     break
                 
-                if card_input.lower() == 'exit':
-                    print("Exiting the program. Goodbye!")
-                    sys.exit(0)
+                input_args = user_input.split()
                 
-                card_args = card_input.split()
-                
-                is_valid_card, card_message = validate_card_input(card_args, valid_colors)
-                
-                if is_valid_card:
-                    print(f"Card input received: {card_input}")
-                    # This is where you would update your card counts.
-                    # For now, it just acknowledges the valid input.
+                # Validate the initial input.
+                is_valid, message = validate_input(input_args, valid_colors)
+            
+                if is_valid:
+                    print(message)
+                    # You would store the initial counts here.
+                    initial_color = input_args[0].upper() # Store the uppercase version
+                    initial_counts = [int(num) for num in input_args[1:]]
+                    print(f"Game started with Color: {initial_color}, Initial Counts: {initial_counts}")
+                    
+                    # This inner loop handles the ongoing game.
+                    while True:
+                        print("\nEnter traded card (color suit color) or offer (color suit), 'new' to start over, or 'exit' to quit.")
+                        card_input = input("Card Played > ").strip()
+                        
+                        if card_input.lower() == 'new':
+                            # Break the inner loop to start a new game.
+                            break
+                        
+                        if card_input.lower() == 'exit':
+                            print("Exiting the program. Goodbye!")
+                            sys.exit(0)
+                        
+                        card_args = card_input.split()
+                        
+                        is_valid_card, card_message = validate_card_input(card_args, valid_colors)
+                        
+                        if is_valid_card:
+                            print(f"Card input received: {card_input}")
+                            # This is where you would update your card counts.
+                            # For now, it just acknowledges the valid input.
+                        else:
+                            print(card_message)
                 else:
-                    print(card_message)
+                    print(message)
         else:
-            print(message)
+            print(player_message)
 
 
 if __name__ == "__main__":

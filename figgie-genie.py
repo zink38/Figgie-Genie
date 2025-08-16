@@ -75,24 +75,24 @@ def validate_card_input(args, valid_colors):
         
         # Check if colors are valid
         if color not in valid_colors or color2 not in valid_colors:
-            return False, f'Error: Invalid color(s). Colors must be {valid_colors}'
+            return False, f'Error: Invalid color(s). Colors must be {valid_colors}',0
         # Check if the suit is valid
         if suit not in valid_suits:
-            return False, "Error: Invalid suit. Suit must be S, C, D, or H."
+            return False, "Error: Invalid suit. Suit must be S, C, D, or H.",0
         # The two colors cannot be the same
         if color == color2:
-            return False, "Error: The two colors cannot be the same."
-        return True, "Valid 'color suit color' input."
+            return False, "Error: The two colors cannot be the same.",0
+        return True, "Valid 'color suit color' input.",0
 
     elif len(args) == 2:
         
         # Check if color and suit are valid
         if color not in valid_colors or suit not in valid_suits:
-            return False, f'Error: Invalid color or suit. Color must be {valid_colors}, and Suit must be S, C, D, or H.'
-        return True, "Valid 'color suit' input."
+            return False, f'Error: Invalid color or suit. Color must be {valid_colors}, and Suit must be S, C, D, or H.',1
+        return True, "Valid 'color suit' input.",1
 
     else:
-        return False, "Error: Invalid input total arguments."
+        return False, "Error: Invalid input total arguments.",-1
 
 def main():
     """
@@ -114,7 +114,18 @@ def main():
         
         # Validate the initial input.
         is_valid, player_message, valid_colors = validate_player_input(input_args)
+        game_state = {}
+        game_state_change = {}
+        game_state_offer = {}
         
+        for color in valid_colors:
+            # Initialize each color with a dictionary of suit counts.
+            suits = ['S','C','D','H']
+            game_state[color] = {suit: 0 for suit in suits}
+            game_state_change[color] = {suit: 0 for suit in suits}
+            game_state_offer[color] = {suit: False for suit in suits}
+
+            
         if is_valid:
             while True:
                 # Prompt for initial game setup.
@@ -135,10 +146,21 @@ def main():
                     # You would store the initial counts here.
                     initial_color = input_args[0].upper() # Store the uppercase version
                     initial_counts = [int(num) for num in input_args[1:]]
+                    game_state[initial_color]['S'] = initial_counts[0]
+                    game_state[initial_color]['C'] = initial_counts[1]
+                    game_state[initial_color]['D'] = initial_counts[2]
+                    game_state[initial_color]['H'] = initial_counts[3]
                     print(f"Game started with Color: {initial_color}, Initial Counts: {initial_counts}")
+                    
                     
                     # This inner loop handles the ongoing game.
                     while True:
+                        print("known card\n")
+                        print(game_state)
+                        print("\n")
+                        print("Changes \n")
+                        print(game_state_change)
+                        print("\n")
                         print("\nEnter traded card (color suit color) or offer (color suit), 'new' to start over, or 'exit' to quit.")
                         card_input = input("Card Played > ").strip()
                         
@@ -150,14 +172,25 @@ def main():
                             print("Exiting the program. Goodbye!")
                             sys.exit(0)
                         
-                        card_args = card_input.split()
+                        card_args = card_input.upper().split()
                         
-                        is_valid_card, card_message = validate_card_input(card_args, valid_colors)
+                        is_valid_card, card_message, type = validate_card_input(card_args, valid_colors)
                         
                         if is_valid_card:
                             print(f"Card input received: {card_input}")
-                            # This is where you would update your card counts.
-                            # For now, it just acknowledges the valid input.
+                                     
+                            if type == 0:
+                                if sum(game_state[card_args[2]].values()) < (40/len(valid_colors)) and game_state_change[card_args[2]][card_args[1]] < 1:
+                                    if game_state_offer[card_args[2]][card_args[1]]:
+                                        game_state_offer[card_args[2]][card_args[1]] = False
+                                    else:
+                                        game_state[card_args[2]][card_args[1]] += 1
+                                game_state_change[card_args[2]][card_args[1]] -= 1
+                                game_state_change[card_args[0]][card_args[1]] += 1
+                            elif type == 1:
+                                if not game_state_offer[card_args[0]][card_args[1]]:
+                                    game_state_offer[card_args[0]][card_args[1]] = True
+                                    game_state[card_args[0]][card_args[1]] += 1
                         else:
                             print(card_message)
                 else:

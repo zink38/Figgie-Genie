@@ -180,17 +180,18 @@ def main():
                             print(f"Card input received: {card_input}")
                                      
                             if type == 0:
-                                if sum(game_state[card_args[2]].values()) < (40/len(valid_colors)) and game_state_change[card_args[2]][card_args[1]] < 1:
-                                    if game_state_offer[card_args[2]][card_args[1]]:
-                                        game_state_offer[card_args[2]][card_args[1]] = False
-                                    else:
-                                        game_state[card_args[2]][card_args[1]] += 1
+                                if (sum(game_state[card_args[2]].values()) < (40/len(valid_colors))) and game_state_change[card_args[2]][card_args[1]] == game_state[card_args[2]][card_args[1]]*-1:
+                                    # if game_state_offer[card_args[2]][card_args[1]]:
+                                    #     game_state_offer[card_args[2]][card_args[1]] = False
+                                    # else:
+                                    print("counted")
+                                    game_state[card_args[2]][card_args[1]] += 1
                                 game_state_change[card_args[2]][card_args[1]] -= 1
                                 game_state_change[card_args[0]][card_args[1]] += 1
-                            elif type == 1:
-                                if not game_state_offer[card_args[0]][card_args[1]]:
-                                    game_state_offer[card_args[0]][card_args[1]] = True
-                                    game_state[card_args[0]][card_args[1]] += 1
+                            # elif type == 1:
+                            #     if not game_state_offer[card_args[0]][card_args[1]]:
+                            #         game_state_offer[card_args[0]][card_args[1]] = True
+                            #         game_state[card_args[0]][card_args[1]] += 1
                         else:
                             print(card_message)
                 else:
